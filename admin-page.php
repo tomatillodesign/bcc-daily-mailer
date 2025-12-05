@@ -779,6 +779,15 @@ if ($notices) {
         <h2>🔍 Debug Information</h2>
         <p class="description">Raw system data for troubleshooting</p>
         
+        <div class="bcc-button-group" style="margin-bottom: 20px;">
+            <form method="post" style="display: inline;">
+                <?php wp_nonce_field('bcc_mailer_action'); ?>
+                <input type="hidden" name="bcc_action" value="migrate_database">
+                <button type="submit" class="button button-secondary">🔧 Run Database Migration</button>
+            </form>
+            <p class="description" style="margin-top: 10px;">Use this if you're getting database errors. This will add any missing columns to the database tables.</p>
+        </div>
+        
         <details>
             <summary style="cursor: pointer; font-weight: bold; padding: 10px; background: #f0f0f1; border-radius: 4px;">
                 Click to Show Debug JSON

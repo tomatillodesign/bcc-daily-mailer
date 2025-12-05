@@ -108,6 +108,50 @@ function bcc_create_tables() {
     require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
     dbDelta($sql_subscribers);
     dbDelta($sql_logs);
+    
+    // Run database migrations
+    bcc_migrate_database();
+}
+
+/**
+ * Database Migrations - Add missing columns to existing tables
+ */
+function bcc_migrate_database() {
+    global $wpdb;
+    $subscribers_table = $wpdb->prefix . 'bcc_subscribers';
+    
+    // Simpler approach: just try to add columns, ignore errors if they exist
+    $columns_to_add = [
+        'first_name' => "ALTER TABLE $subscribers_table ADD COLUMN first_name varchar(255) DEFAULT NULL AFTER email",
+        'last_name' => "ALTER TABLE $subscribers_table ADD COLUMN last_name varchar(255) DEFAULT NULL AFTER first_name",
+        'phone' => "ALTER TABLE $subscribers_table ADD COLUMN phone varchar(50) DEFAULT NULL AFTER last_name",
+        'organization' => "ALTER TABLE $subscribers_table ADD COLUMN organization varchar(255) DEFAULT NULL AFTER phone"
+    ];
+    
+    $results = [];
+    foreach ($columns_to_add as $column => $sql) {
+        // Suppress errors (column might already exist)
+        $wpdb->suppress_errors(true);
+        $result = $wpdb->query($sql);
+        $wpdb->suppress_errors(false);
+        
+        if ($result !== false) {
+            $results[$column] = 'added';
+        } else {
+            // Check if column now exists (might have already existed)
+            $check = $wpdb->get_var($wpdb->prepare(
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s",
+                DB_NAME,
+                $subscribers_table,
+                $column
+            ));
+            $results[$column] = $check > 0 ? 'exists' : 'failed';
+        }
+    }
+    
+    bcc_log('database_migration', null, 'info', $results);
+    return $results;
 }
 
 /**
@@ -126,17 +170,35 @@ function bcc_add_subscriber($email, $source = 'manual', $source_id = null, $addi
     // Check for existing subscriber
     $existing = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE email = %s", $email));
     
-    // Prepare data
+    // Check which columns exist in the table
+    global $wpdb;
+    $table = $wpdb->prefix . 'bcc_subscribers';
+    $columns = $wpdb->get_col("DESCRIBE $table", 0);
+    
+    // Prepare data - only include columns that exist
     $data = [
         'email' => $email,
-        'first_name' => isset($additional_data['first_name']) ? sanitize_text_field($additional_data['first_name']) : null,
-        'last_name' => isset($additional_data['last_name']) ? sanitize_text_field($additional_data['last_name']) : null,
-        'phone' => isset($additional_data['phone']) ? sanitize_text_field($additional_data['phone']) : null,
-        'organization' => isset($additional_data['organization']) ? sanitize_text_field($additional_data['organization']) : null,
         'updated_at' => current_time('mysql')
     ];
+    $format = ['%s', '%s'];
     
-    $format = ['%s', '%s', '%s', '%s', '%s', '%s'];
+    // Add optional columns if they exist in the table
+    if (in_array('first_name', $columns) && isset($additional_data['first_name'])) {
+        $data['first_name'] = sanitize_text_field($additional_data['first_name']);
+        $format[] = '%s';
+    }
+    if (in_array('last_name', $columns) && isset($additional_data['last_name'])) {
+        $data['last_name'] = sanitize_text_field($additional_data['last_name']);
+        $format[] = '%s';
+    }
+    if (in_array('phone', $columns) && isset($additional_data['phone'])) {
+        $data['phone'] = sanitize_text_field($additional_data['phone']);
+        $format[] = '%s';
+    }
+    if (in_array('organization', $columns) && isset($additional_data['organization'])) {
+        $data['organization'] = sanitize_text_field($additional_data['organization']);
+        $format[] = '%s';
+    }
     
     if ($existing) {
         // Update existing subscriber
@@ -799,7 +861,19 @@ function bcc_handle_gravity_form_submission($entry, $form) {
     }
     
     // Add or update subscriber
-    bcc_add_subscriber($email, 'gravity_forms', $entry['id'], $additional_data);
+    $result = bcc_add_subscriber($email, 'gravity_forms', $entry['id'], $additional_data);
+    
+    if ($result) {
+        bcc_log('gravity_form_processed', $email, 'success', [
+            'entry_id' => $entry['id'],
+            'form_id' => $form['id'],
+            'subscriber_id' => $result,
+            'has_first_name' => !empty($additional_data['first_name']),
+            'has_last_name' => !empty($additional_data['last_name']),
+            'has_phone' => !empty($additional_data['phone']),
+            'has_organization' => !empty($additional_data['organization'])
+        ]);
+    }
 }
 
 /**
@@ -1027,6 +1101,11 @@ function bcc_handle_admin_actions() {
             
             bcc_log('template_saved', null, 'success', $settings);
             add_settings_error('bcc_mailer', 'template_saved', 'Settings saved and cron rescheduled', 'success');
+            break;
+            
+        case 'migrate_database':
+            bcc_migrate_database();
+            add_settings_error('bcc_mailer', 'db_migrated', 'Database migration completed successfully', 'success');
             break;
     }
     
