@@ -334,7 +334,7 @@ if ($notices) {
     <div class="bcc-section">
         <h2>⚙️ Email Template & Schedule Settings</h2>
         
-        <form method="post">
+        <form method="post" id="bcc-settings-form">
             <?php wp_nonce_field('bcc_mailer_action'); ?>
             <input type="hidden" name="bcc_action" value="save_template">
             
@@ -388,7 +388,7 @@ if ($notices) {
                 </tr>
                 <tr>
                     <th><label for="greeting">Greeting:</label></th>
-                    <td><input type="text" id="greeting" name="greeting" value="<?php echo esc_attr($settings['greeting']); ?>" required></td>
+                    <td><input type="text" id="greeting" name="greeting" value="<?php echo esc_attr($settings['greeting']); ?>"></td>
                 </tr>
                 <tr>
                     <th><label for="body">Main Message:</label></th>
@@ -396,42 +396,30 @@ if ($notices) {
                 </tr>
                 <tr>
                     <th><label for="button1_text">Button 1 Text:</label></th>
-                    <td><input type="text" id="button1_text" name="button1_text" value="<?php echo esc_attr($settings['button1_text']); ?>" required></td>
+                    <td><input type="text" id="button1_text" name="button1_text" value="<?php echo esc_attr($settings['button1_text']); ?>"></td>
                 </tr>
                 <tr>
                     <th><label for="button1_url">Button 1 URL:</label></th>
-                    <td><input type="url" id="button1_url" name="button1_url" value="<?php echo esc_attr($settings['button1_url']); ?>" required></td>
+                    <td><input type="url" id="button1_url" name="button1_url" value="<?php echo esc_attr($settings['button1_url']); ?>"></td>
                 </tr>
                 <tr>
                     <th><label for="button2_text">Button 2 Text:</label></th>
-                    <td><input type="text" id="button2_text" name="button2_text" value="<?php echo esc_attr($settings['button2_text']); ?>" required></td>
+                    <td><input type="text" id="button2_text" name="button2_text" value="<?php echo esc_attr($settings['button2_text']); ?>"></td>
                 </tr>
                 <tr>
                     <th><label for="button2_url">Button 2 URL:</label></th>
-                    <td><input type="url" id="button2_url" name="button2_url" value="<?php echo esc_attr($settings['button2_url']); ?>" required></td>
+                    <td><input type="url" id="button2_url" name="button2_url" value="<?php echo esc_attr($settings['button2_url']); ?>"></td>
                 </tr>
                 <tr>
                     <th><label for="footer">Footer Text:</label></th>
-                    <td><input type="text" id="footer" name="footer" value="<?php echo esc_attr($settings['footer']); ?>" required></td>
+                    <td><input type="text" id="footer" name="footer" value="<?php echo esc_attr($settings['footer']); ?>"></td>
                 </tr>
             </table>
             
             <p class="description">Use <code>{unsubscribe_url}</code> in your template - it will be replaced automatically with each subscriber's unique link.</p>
             
-            <div class="bcc-button-group">
-                <button type="submit" class="button button-primary">💾 Save All Settings</button>
-            </div>
-        </form>
-    </div>
-    
-    <!-- Section 6: Gravity Forms Integration -->
-    <div class="bcc-section">
-        <h2>📋 Gravity Forms Integration</h2>
-        <p class="description">Configure which Gravity Form should add subscribers and map form fields to subscriber data.</p>
-        
-        <form method="post">
-            <?php wp_nonce_field('bcc_mailer_action'); ?>
-            <input type="hidden" name="bcc_action" value="save_template">
+            <h3 style="color: #13294b; margin-top: 30px;">📋 Gravity Forms Integration</h3>
+            <p class="description">Configure which Gravity Form should add subscribers and map form fields to subscriber data.</p>
             
             <?php
             // Get all Gravity Forms and their fields if available
@@ -680,7 +668,7 @@ if ($notices) {
             <?php endif; ?>
             
             <div class="bcc-button-group">
-                <button type="submit" class="button button-primary">💾 Save Gravity Forms Settings</button>
+                <button type="submit" class="button button-primary">💾 Save All Settings</button>
             </div>
         </form>
     </div>
