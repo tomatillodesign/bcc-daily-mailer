@@ -603,8 +603,9 @@ if ($notices) {
                         var select = document.getElementById(selectId);
                         if (!select) return;
                         
-                        // Reset selection
-                        select.value = '';
+                        // Store current value
+                        var currentValue = select.value;
+                        var currentValueBelongsToForm = false;
                         
                         // Show/hide options based on form ID
                         var options = select.querySelectorAll('option');
@@ -615,11 +616,20 @@ if ($notices) {
                                 var optionFormId = option.getAttribute('data-form-id');
                                 if (optionFormId === formId) {
                                     option.style.display = 'block';
+                                    // Check if current value belongs to this form
+                                    if (option.value === currentValue) {
+                                        currentValueBelongsToForm = true;
+                                    }
                                 } else {
                                     option.style.display = 'none';
                                 }
                             }
                         });
+                        
+                        // Only reset if current value doesn't belong to the selected form
+                        if (!currentValueBelongsToForm && currentValue !== '') {
+                            select.value = '';
+                        }
                     });
                 }
                 
