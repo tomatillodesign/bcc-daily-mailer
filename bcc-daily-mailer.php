@@ -317,9 +317,15 @@ function bcc_send_email($subscriber, $is_test = false) {
     
     $message = str_replace(array_keys($replacements), array_values($replacements), $template);
     
+    // Build From header with sender settings
+    $from_name = isset($settings['from_name']) ? $settings['from_name'] : get_bloginfo('name');
+    $from_email = isset($settings['from_email']) ? $settings['from_email'] : get_option('admin_email');
+    $reply_to = isset($settings['reply_to']) && !empty($settings['reply_to']) ? $settings['reply_to'] : $from_email;
+    
     // Custom headers to override Offload SES Lite
     $headers = [
-        'From: NC Birth Capacity Connector <mombabycmih@gmail.com>',
+        'From: ' . $from_name . ' <' . $from_email . '>',
+        'Reply-To: ' . $reply_to,
         'Content-Type: text/html; charset=UTF-8'
     ];
     
@@ -718,6 +724,9 @@ function bcc_clear_old_logs($keep = 100) {
  */
 function bcc_get_default_email_settings() {
     return [
+        'from_email' => get_option('admin_email'),
+        'from_name' => get_bloginfo('name'),
+        'reply_to' => get_option('admin_email'),
         'subject' => 'Daily Reminder: Submit Your Capacity Data',
         'greeting' => 'Hello,',
         'body' => 'This is your daily reminder to submit your hospital capacity data for today. Please click one of the buttons below to access the reporting system.',
@@ -989,6 +998,9 @@ function bcc_handle_admin_actions() {
             $body = sanitize_textarea_field($body);
             
             $settings = [
+                'from_email' => sanitize_email($_POST['from_email']),
+                'from_name' => sanitize_text_field($_POST['from_name']),
+                'reply_to' => sanitize_email($_POST['reply_to']),
                 'subject' => sanitize_text_field($_POST['subject']),
                 'greeting' => sanitize_text_field($_POST['greeting']),
                 'body' => $body,

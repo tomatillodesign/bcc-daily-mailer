@@ -38,7 +38,12 @@ if ($notices) {
 
 <div class="wrap">
     <h1>🔔 BCC Daily Mailer</h1>
-    <p class="description">Automated daily email reminders at 6:00 AM ET via Amazon SES</p>
+    <?php 
+    $send_time_display = isset($settings['send_time']) ? date('g:i A', strtotime($settings['send_time'])) : '6:00 AM';
+    $from_name = isset($settings['from_name']) ? $settings['from_name'] : get_bloginfo('name');
+    $from_email = isset($settings['from_email']) ? $settings['from_email'] : get_option('admin_email');
+    ?>
+    <p class="description">Automated daily email reminders at <?php echo esc_html($send_time_display); ?> ET from <?php echo esc_html($from_name); ?> (<?php echo esc_html($from_email); ?>) via Amazon SES</p>
     
     <style>
         .bcc-section { background: white; padding: 20px; margin: 20px 0; border: 1px solid #ccd0d4; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
@@ -380,6 +385,31 @@ if ($notices) {
                 </tr>
             </table>
             
+            <h3 style="color: #13294b; margin-top: 30px;">📧 Sender Settings</h3>
+            <table class="bcc-form-table">
+                <tr>
+                    <th><label for="from_email">From Email:</label></th>
+                    <td>
+                        <input type="email" id="from_email" name="from_email" value="<?php echo esc_attr(isset($settings['from_email']) ? $settings['from_email'] : get_option('admin_email')); ?>" required>
+                        <p class="description">Must be verified in Amazon SES</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="from_name">From Name:</label></th>
+                    <td>
+                        <input type="text" id="from_name" name="from_name" value="<?php echo esc_attr(isset($settings['from_name']) ? $settings['from_name'] : get_bloginfo('name')); ?>" required>
+                        <p class="description">Display name for the sender</p>
+                    </td>
+                </tr>
+                <tr>
+                    <th><label for="reply_to">Reply-To Email:</label></th>
+                    <td>
+                        <input type="email" id="reply_to" name="reply_to" value="<?php echo esc_attr(isset($settings['reply_to']) ? $settings['reply_to'] : get_option('admin_email')); ?>">
+                        <p class="description">Optional. Where replies should go (defaults to From Email if empty)</p>
+                    </td>
+                </tr>
+            </table>
+            
             <h3 style="color: #13294b; margin-top: 30px;">✉️ Email Content</h3>
             <table class="bcc-form-table">
                 <tr>
@@ -690,50 +720,57 @@ if ($notices) {
         <?php if (empty($logs)): ?>
             <p>No activity logged yet.</p>
         <?php else: ?>
-            <table class="bcc-logs-table">
-                <thead>
-                    <tr>
-                        <th>Timestamp (ET)</th>
-                        <th>Action</th>
-                        <th>Email</th>
-                        <th>Status</th>
-                        <th>Details</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($logs as $log): ?>
-                        <?php 
-                        $row_class = '';
-                        if ($log->status === 'success') $row_class = 'bcc-log-success';
-                        elseif ($log->status === 'error') $row_class = 'bcc-log-error';
-                        elseif ($log->status === 'info') $row_class = 'bcc-log-info';
-                        
-                        $details = json_decode($log->details, true);
-                        $details_display = '';
-                        if (!empty($details)) {
-                            if (isset($details['error'])) {
-                                $details_display = 'Error: ' . $details['error'];
-                            } elseif (isset($details['reason'])) {
-                                $details_display = 'Reason: ' . $details['reason'];
-                            } else {
-                                $details_display = json_encode($details);
-                            }
-                        }
-                        ?>
-                        <tr class="<?php echo $row_class; ?>">
-                            <td><?php echo get_date_from_gmt($log->timestamp, 'M j, Y g:i:s A'); ?></td>
-                            <td><?php echo esc_html($log->action); ?></td>
-                            <td><?php echo esc_html($log->email ?: '-'); ?></td>
-                            <td><strong><?php echo esc_html($log->status); ?></strong></td>
-                            <td>
-                                <div class="bcc-log-details" title="<?php echo esc_attr($details_display); ?>">
-                                    <?php echo esc_html($details_display); ?>
-                                </div>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <details>
+                <summary style="cursor: pointer; font-weight: bold; padding: 10px; background: #f0f0f1; border-radius: 4px;">
+                    Click to Show Activity Log (<?php echo count($logs); ?> entries)
+                </summary>
+                <div style="margin-top: 10px;">
+                    <table class="bcc-logs-table">
+                        <thead>
+                            <tr>
+                                <th>Timestamp (ET)</th>
+                                <th>Action</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($logs as $log): ?>
+                                <?php 
+                                $row_class = '';
+                                if ($log->status === 'success') $row_class = 'bcc-log-success';
+                                elseif ($log->status === 'error') $row_class = 'bcc-log-error';
+                                elseif ($log->status === 'info') $row_class = 'bcc-log-info';
+                                
+                                $details = json_decode($log->details, true);
+                                $details_display = '';
+                                if (!empty($details)) {
+                                    if (isset($details['error'])) {
+                                        $details_display = 'Error: ' . $details['error'];
+                                    } elseif (isset($details['reason'])) {
+                                        $details_display = 'Reason: ' . $details['reason'];
+                                    } else {
+                                        $details_display = json_encode($details);
+                                    }
+                                }
+                                ?>
+                                <tr class="<?php echo $row_class; ?>">
+                                    <td><?php echo get_date_from_gmt($log->timestamp, 'M j, Y g:i:s A'); ?></td>
+                                    <td><?php echo esc_html($log->action); ?></td>
+                                    <td><?php echo esc_html($log->email ?: '-'); ?></td>
+                                    <td><strong><?php echo esc_html($log->status); ?></strong></td>
+                                    <td>
+                                        <div class="bcc-log-details" title="<?php echo esc_attr($details_display); ?>">
+                                            <?php echo esc_html($details_display); ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </details>
         <?php endif; ?>
     </div>
     
