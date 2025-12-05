@@ -21,6 +21,55 @@ define('BCC_MAILER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BCC_MAILER_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 /**
+ * Enqueue Modal Trigger Script
+ */
+add_action('wp_enqueue_scripts', 'bcc_enqueue_modal_trigger');
+function bcc_enqueue_modal_trigger() {
+    wp_enqueue_script(
+        'bcc-modal-trigger',
+        BCC_MAILER_PLUGIN_URL . 'modal-trigger.js',
+        [],
+        BCC_MAILER_VERSION,
+        true
+    );
+}
+
+/**
+ * Render Subscribe Modal in Footer (Yakstrap compatible)
+ */
+add_action('wp_footer', 'bcc_render_subscribe_modal');
+function bcc_render_subscribe_modal() {
+    $settings = get_option('bcc_email_settings', bcc_get_default_email_settings());
+    $form_id = isset($settings['gf_form_id']) ? $settings['gf_form_id'] : '';
+    
+    if (empty($form_id)) {
+        return; // No form configured
+    }
+    
+    // Render yakstrap-compatible modal HTML
+    ?>
+    <div id="bccSubscribeModal" class="yak-modal modal fade" role="dialog" aria-modal="true" aria-hidden="true" style="display: none;">
+        <div class="yak-modal-dialog modal-dialog" tabindex="-1">
+            <div class="yak-modal-content modal-content">
+                <div class="yak-modal-header modal-header">
+                    <h2 class="yak-modal-title">Subscribe to Daily Email</h2>
+                    <button type="button" class="yak-modal__close" aria-label="Close" data-bs-dismiss="modal">
+                        <span aria-hidden="true">✕</span>
+                    </button>
+                </div>
+                <div class="yak-modal-body modal-body">
+                    <?php echo do_shortcode('[gravityform id="' . esc_attr($form_id) . '" title="true" description="true" ajax="true"]'); ?>
+                </div>
+                <div class="yak-modal-footer modal-footer">
+                    <button type="button" class="button" data-bs-dismiss="modal">Close without submitting</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <?php
+}
+
+/**
  * Plugin Activation
  */
 register_activation_hook(__FILE__, 'bcc_mailer_activate');

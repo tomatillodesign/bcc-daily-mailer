@@ -448,6 +448,25 @@ if ($notices) {
             
             <p class="description">Use <code>{unsubscribe_url}</code> in your template - it will be replaced automatically with each subscriber's unique link.</p>
             
+            <h3 style="color: #13294b; margin-top: 30px;">🔘 Frontend Subscribe Button</h3>
+            <div class="bcc-info" style="margin-bottom: 20px;">
+                <p><strong>Add a subscribe button to any page:</strong></p>
+                <ol style="margin-left: 20px;">
+                    <li>Create any button block in WordPress</li>
+                    <li>In the block settings sidebar, expand <strong>"Advanced"</strong></li>
+                    <li>Set the <strong>"HTML Anchor"</strong> field to: <code style="background: #f0f0f1; padding: 2px 6px; border-radius: 3px;">bcc-daily-email-subscribe-btn-9324589349034</code></li>
+                    <li>That's it! The JavaScript will automatically make it open the modal</li>
+                </ol>
+                
+                <p><strong>Or manually add the ID to any element:</strong></p>
+                <pre style="background: #f0f0f1; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px;">&lt;div class="wp-block-button" id="bcc-daily-email-subscribe-btn-9324589349034"&gt;
+    &lt;a class="wp-block-button__link"&gt;Subscribe to Daily Email&lt;/a&gt;
+&lt;/div&gt;</pre>
+                
+                <p>When clicked, it will open a modal with your configured Gravity Form (<?php echo !empty($settings['gf_form_id']) ? 'Form ID: ' . esc_html($settings['gf_form_id']) : '<strong>No form selected yet</strong>'; ?>).</p>
+                <p class="description">The script automatically adds the modal trigger attributes and integrates with your theme's yakstrap modal system.</p>
+            </div>
+            
             <h3 style="color: #13294b; margin-top: 30px;">📋 Gravity Forms Integration</h3>
             <p class="description">Configure which Gravity Form should add subscribers and map form fields to subscriber data.</p>
             
