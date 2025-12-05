@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Daily Reminder</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f4f4f4;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f4f4;">
+        <tr>
+            <td style="padding: 40px 20px;">
+                <!-- Main Container -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="padding: 30px 40px; text-align: center; background-color: #13294b; border-radius: 8px 8px 0 0;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">NC Birth Capacity Connector</h1>
+                        </td>
+                    </tr>
+                    
+                    <!-- Greeting -->
+                    <tr>
+                        <td style="padding: 30px 40px 20px 40px;">
+                            <p style="margin: 0; font-size: 16px; color: #2d3748; line-height: 1.5;">{greeting}</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Main Body -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <p style="margin: 0; font-size: 16px; color: #4a5568; line-height: 1.6;">{body}</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Buttons -->
+                    <tr>
+                        <td style="padding: 0 40px 30px 40px;">
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
+                                <tr>
+                                    <!-- Button 1 -->
+                                    <td style="padding-right: 10px;" width="50%">
+                                        <a href="{button1_url}" style="display: block; text-align: center; background-color: #13294b; color: #ffffff; padding: 14px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 15px;">{button1_text}</a>
+                                    </td>
+                                    <!-- Button 2 -->
+                                    <td style="padding-left: 10px;" width="50%">
+                                        <a href="{button2_url}" style="display: block; text-align: center; background-color: #4b9cd3; color: #ffffff; padding: 14px 20px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 15px;">{button2_text}</a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #eff0f1; border-radius: 0 0 8px 8px; border-top: 1px solid #d0d1d2;">
+                            <p style="margin: 0 0 15px 0; font-size: 14px; color: #718096; line-height: 1.5; text-align: center;">{footer}</p>
+                            <p style="margin: 0; font-size: 12px; color: #a0aec0; text-align: center;">
+                                <a href="{unsubscribe_url}" style="color: #a0aec0; text-decoration: underline;">Unsubscribe from these emails</a>
+                            </p>
+                        </td>
+                    </tr>
+                    
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+
